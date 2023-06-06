@@ -1,0 +1,11 @@
+api:
+  port: 8080
+render:
+  local: true
+  pool_size: 10
+  rod_address: 'ws://117.50.175.64:7317'
+proxy:
+  open: true
+  proxy_address: "u8705.100.tn.16yun.cn:6330"
+  proxy_user: "16TLTVSR"
+  proxy_password: "730888"
