@@ -12,9 +12,9 @@ type RedisUtil struct {
 
 func (r *RedisUtil) Connect(cfg configReader.RedisCfg) {
 	r.Client = redis.NewClient(&redis.Options{
-		Addr:     cfg.Uri,
+		Addr:     cfg.Url,
 		Password: cfg.Password,
-		DB:       0,
+		DB:       cfg.Db,
 	})
 }
 
@@ -27,9 +27,9 @@ func (r *RedisUtil) Get(key string) string {
 	return val
 }
 
-func (r *RedisUtil) Lpop(key string) string {
+func (r *RedisUtil) Lpop() string {
 	ctx := context.Background()
-	val, err := r.Client.LPop(ctx, key).Result()
+	val, err := r.Client.LPop(ctx, configReader.Config.Redis.TaskKey).Result()
 	if err != nil {
 		return ""
 	}

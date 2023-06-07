@@ -1,5 +1,3 @@
-api:
-  port: 8080
 render:
   local: true
   pool_size: 10
@@ -9,3 +7,12 @@ proxy:
   proxy_address: "u8705.100.tn.16yun.cn:6330"
   proxy_user: "16TLTVSR"
   proxy_password: "730888"
+redis:
+  url: '117.50.175.64:6379'
+  password: 'jhkdjhkjdhsIUTYURTU_688J6j'
+  db: 0
+  task_key: "test"
+mongo:
+  url: "mongodb://mongo_DMJS43:mongo_JJ3yYM@117.50.175.64:27017"
+  db: rod
+  render: "rendered_html"

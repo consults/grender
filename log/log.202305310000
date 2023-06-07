@@ -1,9 +1,0 @@
-[2023-05-31 10:27:05,857] [WARNING] [main/main.go:33] 初始化日志
-[2023-05-31 10:27:05,874] [WARNING] [grender/core/configReader/configReader.go:51] {{8080} {true 10 ws://117.50.175.64:7317} {true u8705.100.tn.16yun.cn:6330 16TLTVSR 730888}}
-[2023-05-31 10:27:05,874] [WARNING] [main/main.go:36] 初始化配置文件
-[2023-05-31 10:27:05,874] [WARNING] [grender/core/render/render.go:24] 使用本地浏览器
-[2023-05-31 10:27:05,875] [WARNING] [grender/core/render/render.go:31] 代理地址：【u8705.100.tn.16yun.cn:6330】 
-
-[2023-05-31 10:27:07,803] [WARNING] [grender/core/render/render.go:41] 代理认证：【16TLTVSR】【730888】 
-
-[2023-05-31 10:27:10,815] [WARNING] [main/main.go:39] 初始化rodrender

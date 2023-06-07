@@ -10,13 +10,15 @@ import (
 var Config *Cfg
 
 type MongoCfg struct {
-	Uri       string `yaml:"uri"`
+	Url       string `yaml:"url"`
 	DB        string `yaml:"db"`
 	RenderCol string `yaml:"render"`
 }
 type RedisCfg struct {
-	Uri      string `yaml:"uri"`
+	Url      string `yaml:"url"`
 	Password string `yaml:"password"`
+	Db       int    `yaml:"db"`
+	TaskKey  string `yaml:"task_key"`
 }
 type Proxy struct {
 	Open          bool   `yaml:"open"`
@@ -36,11 +38,10 @@ type Render struct {
 }
 
 type Cfg struct {
-	Api      Api
-	Render   Render
-	Proxy    Proxy
-	MongoCfg MongoCfg
-	RedisCfg RedisCfg
+	Render Render
+	Proxy  Proxy
+	Mongo  MongoCfg
+	Redis  RedisCfg
 }
 
 func InitConfig() {
@@ -59,5 +60,5 @@ func InitConfig() {
 	if err != nil {
 		panic("配置文件格式有问题！")
 	}
-	log.Warning(c)
+	log.Warning(Config)
 }

@@ -23,7 +23,7 @@ func (m *MongoUtil) Disconnect() {
 }
 
 func (m *MongoUtil) Connect(cfg configReader.MongoCfg) {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.Uri))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(cfg.Url))
 	if err != nil {
 		panic(err)
 	}
@@ -32,10 +32,10 @@ func (m *MongoUtil) Connect(cfg configReader.MongoCfg) {
 	m.RenderHandler = m.db.Collection(cfg.RenderCol)
 }
 
-func (m *MongoUtil) InsertOne(url, html string) {
+func (m *MongoUtil) InsertOne(url, html string, xpath string, render bool) {
 	now := time.Now()
 	ts := now.Format("2006-01-02 15:04:05")
-	doc := bson.M{"url": url, "html": html, "ts": ts}
+	doc := bson.M{"url": url, "html": html, "ts": ts, "xpath": xpath, "render": render}
 	_, err := m.RenderHandler.InsertOne(context.TODO(), doc)
 	if err != nil {
 		log.Println(".....", err)

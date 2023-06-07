@@ -10,7 +10,9 @@ proxy:
 redis:
   url: '117.50.175.64:6379'
   password: 'jhkdjhkjdhsIUTYURTU_688J6j'
+  db: 0
+  task_key: "test"
 mongo:
   url: "mongodb://mongo_DMJS43:mongo_JJ3yYM@117.50.175.64:27017"
   db: rod
-  render: rendered_html
+  render: "rendered_html"

@@ -33,7 +33,7 @@ func InitRender() {
 	}
 	browser := rod.New().ControlURL(RodRender.Launcher.MustLaunch())
 	RodRender.Browser = browser
-	browser.Timeout(time.Second * 20)
+	browser.Timeout(time.Second * 10)
 	browser.MustConnect()
 	//defer browser.MustClose()
 	// 添加代理
@@ -48,7 +48,7 @@ func InitRender() {
 	}
 }
 func WaitLoadElement(page *rod.Page, url string, xpath string, timeout int) bool {
-	fmt.Println(url)
+	page.Timeout(time.Second * 10)
 	page.MustNavigate(url)
 	page.MustWaitLoad()
 	if timeout == 0 {
