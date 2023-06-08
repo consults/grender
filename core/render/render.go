@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
+	"github.com/go-rod/rod/lib/proto"
 	"github.com/go-rod/stealth"
 	log "github.com/sirupsen/logrus"
 	"grender/core/configReader"
+	"grender/core/model"
 	"time"
 )
 
@@ -18,11 +20,44 @@ type Render struct {
 	PagePool chan *rod.Page
 }
 
+func blockImage(ctx *rod.Hijack) {
+	if ctx.Request.Type() == proto.NetworkResourceTypeImage {
+		ctx.Response.Fail(proto.NetworkErrorReasonBlockedByClient)
+		return
+	}
+	ctx.ContinueRequest(&proto.FetchContinueRequest{})
+}
+func AddCookies(page *rod.Page, cList []model.Cook) error {
+	var addCookErr error
+	cookies := make([]*proto.NetworkCookieParam, 0)
+	for _, cookie := range cList {
+		expr := proto.TimeSinceEpoch(time.Now().Add(180 * 24 * time.Hour).Unix())
+		c := &proto.NetworkCookieParam{
+			Name:     cookie.Name,
+			Value:    cookie.Value,
+			Domain:   cookie.Domain,
+			HTTPOnly: true,
+			Expires:  expr,
+		}
+		cookies = append(cookies, c)
+		addCookErr = page.SetCookies(cookies)
+	}
+	return addCookErr
+}
+func disableMedia(browser *rod.Browser) {
+	// 中间人
+	router := browser.HijackRequests()
+	//defer router.MustStop()
+	router.MustAdd("*.png", blockImage)
+	router.MustAdd("*.jpg", blockImage)
+	go router.Run()
+}
 func InitRender() {
 	RodRender = &Render{}
 	if configReader.Config.Render.Local == true {
 		log.Warningln("使用本地浏览器")
 		RodRender.Launcher = launcher.New().NoSandbox(true).Headless(false)
+		RodRender.Launcher.Set("disable-gpu").Delete("disable-gpu")
 	} else {
 		log.Warningf("使用远程浏览器：【%s】\n", configReader.Config.Render.RodAddress)
 		RodRender.Launcher = launcher.MustNewManaged(configReader.Config.Render.RodAddress)
@@ -40,12 +75,21 @@ func InitRender() {
 	if configReader.Config.Proxy.Open {
 		log.Warningf("代理认证：【%s】【%s】 \n", configReader.Config.Proxy.ProxyUser, configReader.Config.Proxy.ProxyPassword)
 		go browser.HandleAuth(configReader.Config.Proxy.ProxyUser, configReader.Config.Proxy.ProxyPassword)()
+	} else {
+		log.Warningln("关闭代理认证，添加禁止图片加载")
+		disableMedia(browser)
 	}
 	RodRender.PagePool = make(chan *rod.Page, configReader.Config.Render.PoolSize)
 	for i := 0; i < 10; i++ {
 		page := stealth.MustPage(browser)
 		RodRender.PagePool <- page
 	}
+	// 代理和监控有冲突，只能关闭代理的情况下开启监控
+	if configReader.Config.Monitor.Open && !configReader.Config.Proxy.Open {
+		log.Warningln("关闭代理，开启监控")
+		launcher.Open(browser.ServeMonitor(configReader.Config.Monitor.Address))
+	}
+
 }
 func WaitLoadElement(page *rod.Page, url string, xpath string, timeout int) bool {
 	page.Timeout(time.Second * 10)

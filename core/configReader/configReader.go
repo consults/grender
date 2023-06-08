@@ -9,6 +9,10 @@ import (
 
 var Config *Cfg
 
+type Monitor struct {
+	Open    bool   `yaml:"open"`
+	Address string `yaml:"address"`
+}
 type MongoCfg struct {
 	Url       string `yaml:"url"`
 	DB        string `yaml:"db"`
@@ -38,10 +42,11 @@ type Render struct {
 }
 
 type Cfg struct {
-	Render Render
-	Proxy  Proxy
-	Mongo  MongoCfg
-	Redis  RedisCfg
+	Render  Render
+	Proxy   Proxy
+	Mongo   MongoCfg
+	Redis   RedisCfg
+	Monitor Monitor
 }
 
 func InitConfig() {

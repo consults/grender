@@ -25,6 +25,7 @@ func getTask(taskQueue chan model.Task, redis *db.RedisUtil) {
 			log.Errorln(modelTaskErr.Error())
 			continue
 		}
+
 		taskQueue <- modelTask
 		log.Infof("添加任务：【%s】\n", modelTask.Url)
 	}
@@ -33,6 +34,12 @@ func renderHtml(page *rod.Page, task model.Task, mongo *db.MongoUtil) {
 	defer func() {
 		render.RodRender.PagePool <- page
 	}()
+	if len(task.Cookies) > 0 {
+		addCookErr := render.AddCookies(page, task.Cookies)
+		if addCookErr != nil {
+			log.Errorf("添加cookies失败：【%s】 \n", task.Url)
+		}
+	}
 	renderDone := render.WaitLoadElement(page, task.Url, task.Xpath, task.TimeOut)
 	html := ""
 	if renderDone {

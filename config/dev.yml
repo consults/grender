@@ -1,9 +1,10 @@
 render:
-  local: true
+  local: false
   pool_size: 10
   rod_address: 'ws://117.50.175.64:7317'
+# 关闭代理会自动开启不加载图片
 proxy:
-  open: true
+  open: false
   proxy_address: "u8705.100.tn.16yun.cn:6330"
   proxy_user: "16TLTVSR"
   proxy_password: "730888"
@@ -16,3 +17,7 @@ mongo:
   url: "mongodb://mongo_DMJS43:mongo_JJ3yYM@117.50.175.64:27017"
   db: rod
   render: "rendered_html"
+#  是否开启监控，监控和代理有冲突
+monitor:
+  open: false
+  address: "0.0.0.0:7318"
