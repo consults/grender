@@ -52,42 +52,47 @@ func disableMedia(browser *rod.Browser) {
 	router.MustAdd("*.jpg", blockImage)
 	go router.Run()
 }
+func AddProxy() {
+	if configReader.Config.Proxy.Open {
+		log.Warningf("代理地址：【%s】 \n", configReader.Config.Proxy.ProxyAddress)
+		RodRender.Launcher.Proxy(configReader.Config.Proxy.ProxyAddress)
+	}
+}
 func InitRender() {
 	RodRender = &Render{}
 	if configReader.Config.Render.Local == true {
 		log.Warningln("使用本地浏览器")
 		RodRender.Launcher = launcher.New().NoSandbox(true).Headless(false)
 		RodRender.Launcher.Set("disable-gpu").Delete("disable-gpu")
+		AddProxy()
+		RodRender.Browser = rod.New().ControlURL(RodRender.Launcher.MustLaunch())
 	} else {
 		log.Warningf("使用远程浏览器：【%s】\n", configReader.Config.Render.RodAddress)
 		RodRender.Launcher = launcher.MustNewManaged(configReader.Config.Render.RodAddress)
+		RodRender.Launcher.Set("disable-gpu").Delete("disable-gpu").Headless(false).XVFB("--server-num=5", "--server-args=-screen 0 1600x900x16")
+		AddProxy()
+		RodRender.Browser = rod.New().Client(RodRender.Launcher.MustClient())
 	}
-	if configReader.Config.Proxy.Open {
-		log.Warningf("代理地址：【%s】 \n", configReader.Config.Proxy.ProxyAddress)
-		RodRender.Launcher.Proxy(configReader.Config.Proxy.ProxyAddress)
-	}
-	browser := rod.New().ControlURL(RodRender.Launcher.MustLaunch())
-	RodRender.Browser = browser
-	browser.Timeout(time.Second * 10)
-	browser.MustConnect()
+
+	RodRender.Browser.MustConnect()
 	//defer browser.MustClose()
 	// 添加代理
 	if configReader.Config.Proxy.Open {
 		log.Warningf("代理认证：【%s】【%s】 \n", configReader.Config.Proxy.ProxyUser, configReader.Config.Proxy.ProxyPassword)
-		go browser.HandleAuth(configReader.Config.Proxy.ProxyUser, configReader.Config.Proxy.ProxyPassword)()
+		go RodRender.Browser.HandleAuth(configReader.Config.Proxy.ProxyUser, configReader.Config.Proxy.ProxyPassword)()
 	} else {
 		log.Warningln("关闭代理认证，添加禁止图片加载")
-		disableMedia(browser)
+		disableMedia(RodRender.Browser)
 	}
 	RodRender.PagePool = make(chan *rod.Page, configReader.Config.Render.PoolSize)
-	for i := 0; i < 10; i++ {
-		page := stealth.MustPage(browser)
+	for i := 0; i < configReader.Config.Render.PoolSize; i++ {
+		page := stealth.MustPage(RodRender.Browser)
 		RodRender.PagePool <- page
 	}
 	// 代理和监控有冲突，只能关闭代理的情况下开启监控
 	if configReader.Config.Monitor.Open && !configReader.Config.Proxy.Open {
 		log.Warningln("关闭代理，开启监控")
-		launcher.Open(browser.ServeMonitor(configReader.Config.Monitor.Address))
+		launcher.Open(RodRender.Browser.ServeMonitor(configReader.Config.Monitor.Address))
 	}
 
 }
