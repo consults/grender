@@ -1,10 +1,10 @@
 render:
-  local: true
-  pool_size: 10
+  local: false
+  pool_size: 1
   rod_address: 'ws://117.50.175.64:7317'
 # 关闭代理会自动开启不加载图片
 proxy:
-  open: true
+  open: false
   proxy_address: "u8705.100.tn.16yun.cn:6330"
   proxy_user: "16TLTVSR"
   proxy_password: "730888"
